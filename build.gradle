@@ -292,7 +292,7 @@ targetList.each { target ->
 }
 
 private ArrayList<DefFile> targetDefFiles(String target) {
-    def platform = targetToPlatform(target)
+    def platform = targetToFamily(target)
     def substitution = ['arch': target,
                         'os'  : targetToOs(target)]
     project(':klib').file("src/platform/$platform")
@@ -301,7 +301,7 @@ private ArrayList<DefFile> targetDefFiles(String target) {
             .collect { new DefFile(it, substitution) }
 }
 
-private String targetToPlatform(String target) {
+private String targetToFamily(String target) {
     new TargetManager(target).target.family.name().toLowerCase()
 }
 
@@ -313,12 +313,28 @@ private String defFileToTaskName(String target, String name) {
     return "$target-$name".toString()
 }
 
-task distPlatformLibs {
-    // def target = TargetManager.host.name().toLowerCase()
-    dependsOn  targetList.collect { 
+private List<String> targetsToPlatformLibTasks(List<String> targets) {
+    return targets.collect { 
         targetName -> targetDefFiles(targetName).collect {
             defFileToTaskName(targetName, it.name)
         }
+    }
+}
+
+// Just an alias.
+task distPlatformLibs(dependsOn: 'crossPlatformLibs')
+
+task platformLibs {
+    dependsOn targetsToPlatformLibTasks([hostName])
+}
+
+task crossPlatformLibs {
+    dependsOn targetsToPlatformLibTasks(targetList)
+}
+
+targetList.each { targetName ->
+    task "${target}PlatformLibs" {
+        dependsOn argetsToPlatformLibTasks([targetName])
     }
 }
 
