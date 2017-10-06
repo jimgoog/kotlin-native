@@ -333,8 +333,8 @@ task crossPlatformLibs {
 }
 
 targetList.each { targetName ->
-    task "${target}PlatformLibs" {
-        dependsOn argetsToPlatformLibTasks([targetName])
+    task "${targetName}PlatformLibs" {
+        dependsOn targetsToPlatformLibTasks([targetName])
     }
 }
 
